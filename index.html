@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#121214" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Emberfall" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Emberfall</title>
+  <style>
+    :root{
+      --bg:#0e0e10; --panel:#17171b; --panel2:#202027; --text:#f2efe9; --muted:#9e9aa6;
+      --accent:#ff7a36; --accent2:#ffb35f; --good:#72d894; --danger:#ff5a6a; --gold:#ffd166;
+      --line:#2b2b33;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:linear-gradient(180deg,#0d0d0f,#151117 60%,#0d0d0f);color:var(--text);
+      font-family:ui-rounded,-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;min-height:100%}
+    body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+    .app{max-width:760px;margin:auto;padding:14px 14px 90px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    h1{margin:0;font-size:26px;letter-spacing:.4px}
+    .sub{color:var(--muted);font-size:13px}
+    .pill{background:#24242a;border:1px solid #32323a;border-radius:999px;padding:8px 11px;font-size:13px}
+    .grid{display:grid;grid-template-columns:1.3fr .7fr;gap:12px}
+    .card{background:rgba(23,23,27,.96);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+    .hero{min-height:360px;display:flex;flex-direction:column;justify-content:space-between}
+    .zone{font-size:12px;color:var(--accent2);text-transform:uppercase;letter-spacing:1.4px}
+    .enemy-name{font-size:27px;font-weight:800;margin:6px 0 2px}
+    .enemy-level{font-size:13px;color:var(--muted)}
+    .enemy-art{height:160px;display:grid;place-items:center;font-size:92px;filter:drop-shadow(0 14px 18px rgba(0,0,0,.45));user-select:none}
+    .bar{height:12px;background:#292931;border-radius:999px;overflow:hidden;border:1px solid #34343c}
+    .bar>i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--danger),#ff8c64);transition:width .2s}
+    .xpbar>i{background:linear-gradient(90deg,#7d67ff,#b299ff)}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .statline{font-size:13px;color:var(--muted);margin-top:6px}
+    .bigbtn{width:100%;border:0;border-radius:15px;padding:15px 16px;font-size:17px;font-weight:800;color:#20130c;
+      background:linear-gradient(180deg,var(--accent2),var(--accent));box-shadow:0 6px 0 #a63f16;transform:translateY(0)}
+    .bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 #a63f16}
+    .mini{border:1px solid #3a3a43;background:#25252c;color:var(--text);border-radius:12px;padding:9px 11px;font-weight:700}
+    .mini:active{transform:scale(.98)}
+    .stats{display:grid;gap:8px}
+    .stat{background:#202027;border:1px solid #2d2d35;border-radius:14px;padding:11px}
+    .stat b{font-size:18px}.stat span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+    .section-title{font-weight:800;margin:2px 0 10px}
+    .upgrade{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #282830}
+    .upgrade:last-child{border-bottom:0}
+    .upgrade .name{font-weight:700}.upgrade small{display:block;color:var(--muted);margin-top:2px}
+    .tabs{position:fixed;left:0;right:0;bottom:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:rgba(13,13,15,.92);
+      backdrop-filter:blur(14px);border-top:1px solid #292930;display:flex;gap:8px;justify-content:center}
+    .tab{flex:1;max-width:180px;border:1px solid #32323a;background:#1f1f25;color:#aaa7b1;border-radius:13px;padding:10px;font-weight:800}
+    .tab.active{color:var(--text);background:#2b2525;border-color:#6c3b25}
+    .screen{display:none}.screen.active{display:block}
+    .loot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .lootitem{padding:11px;background:#202027;border:1px solid #2d2d35;border-radius:13px}
+    .lootitem b{display:block}.lootitem span{font-size:12px;color:var(--muted)}
+    .notice{margin-top:9px;min-height:18px;color:var(--good);font-size:13px;text-align:center}
+    .boss{color:#ff8c95}
+    .muted{color:var(--muted)}
+    .danger{color:var(--danger)}
+    .gold{color:var(--gold)}
+    .prestige{background:linear-gradient(180deg,#251d2a,#18151e);border-color:#49334f}
+    .prestige button{background:linear-gradient(180deg,#c7a2ff,#8558d6);box-shadow:0 6px 0 #4e2b88;color:#130b1d}
+    .prestige button:active{box-shadow:0 2px 0 #4e2b88}
+    @media(max-width:620px){.grid{grid-template-columns:1fr}.hero{min-height:330px}.enemy-art{height:135px;font-size:80px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div><h1>EMBERFALL</h1><div class="sub">tiny offline progression RPG</div></div>
+    <div class="pill">🔥 <span id="embersTop">0</span></div>
+  </div>
+
+  <section id="battleScreen" class="screen active">
+    <div class="grid">
+      <div class="card hero">
+        <div>
+          <div class="row">
+            <div>
+              <div class="zone" id="zoneLabel">Ashen Road</div>
+              <div class="enemy-name" id="enemyName">Cinder Rat</div>
+              <div class="enemy-level" id="enemyLevel">Level 1</div>
+            </div>
+            <button class="mini" id="autoBtn">Auto: OFF</button>
+          </div>
+          <div class="enemy-art" id="enemyArt">🐀</div>
+          <div class="bar"><i id="enemyHpFill"></i></div>
+          <div class="row statline"><span id="enemyHpText">10 / 10 HP</span><span id="enemyTag"></span></div>
+        </div>
+        <div>
+          <button class="bigbtn" id="attackBtn">ATTACK</button>
+          <div class="notice" id="battleNotice"></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="card">
+          <div class="section-title">You</div>
+          <div class="stat"><b id="levelStat">1</b><span>Level</span></div>
+          <div class="stat"><b id="damageStat">2</b><span>Damage</span></div>
+          <div class="stat"><b class="gold" id="goldStat">0</b><span>Gold</span></div>
+          <div class="stat"><b id="killsStat">0</b><span>Kills</span></div>
+        </div>
+        <div class="card">
+          <div class="section-title">Experience</div>
+          <div class="bar xpbar"><i id="xpFill"></i></div>
+          <div class="statline" id="xpText">0 / 12 XP</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="upgradeScreen" class="screen">
+    <div class="card">
+      <div class="section-title">Upgrades</div>
+      <div class="upgrade">
+        <div><div class="name">Sharper Blade</div><small>+1 base damage</small></div>
+        <button class="mini" id="buyDamage">Buy · <span id="damageCost">10</span>g</button>
+      </div>
+      <div class="upgrade">
+        <div><div class="name">Battle Rhythm</div><small>Auto-attack 10% faster</small></div>
+        <button class="mini" id="buySpeed">Buy · <span id="speedCost">25</span>g</button>
+      </div>
+      <div class="upgrade">
+        <div><div class="name">Lucky Charm</div><small>+8% gold from kills</small></div>
+        <button class="mini" id="buyGold">Buy · <span id="goldCost">30</span>g</button>
+      </div>
+      <div class="upgrade">
+        <div><div class="name">Hunter's Mark</div><small>+10% boss damage</small></div>
+        <button class="mini" id="buyBoss">Buy · <span id="bossCost">40</span>g</button>
+      </div>
+    </div>
+
+    <div class="card prestige" style="margin-top:12px">
+      <div class="section-title">Ascension</div>
+      <p class="muted" style="margin-top:0">After reaching level 20, reset your run to earn permanent Embers. Each Ember gives +5% all damage forever.</p>
+      <div class="row" style="margin-bottom:12px">
+        <div><b id="emberStat">0</b><div class="muted" style="font-size:12px">Permanent Embers</div></div>
+        <div><b id="emberBonus">+0%</b><div class="muted" style="font-size:12px">Damage bonus</div></div>
+      </div>
+      <button class="bigbtn" id="ascendBtn">ASCEND AT LEVEL 20</button>
+    </div>
+  </section>
+
+  <section id="collectionScreen" class="screen">
+    <div class="card">
+      <div class="section-title">Bestiary</div>
+      <div class="loot" id="bestiary"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="section-title">Run Records</div>
+      <div class="stat"><b id="highestLevel">1</b><span>Highest Level</span></div>
+      <div class="stat" style="margin-top:8px"><b id="totalKills">0</b><span>Total Kills</span></div>
+      <div class="stat" style="margin-top:8px"><b id="ascensions">0</b><span>Ascensions</span></div>
+      <button class="mini danger" id="resetBtn" style="margin-top:12px;width:100%">Reset Save</button>
+    </div>
+  </section>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="battleScreen">⚔️ Battle</button>
+  <button class="tab" data-tab="upgradeScreen">⬆️ Upgrades</button>
+  <button class="tab" data-tab="collectionScreen">📖 Records</button>
+</div>
+
+<script>
+const ENEMIES = [
+  ["Cinder Rat","🐀","Ashen Road"],
+  ["Bog Slime","🟢","Mire Hollow"],
+  ["Grave Crow","🐦‍⬛","Old Barrow"],
+  ["Iron Boar","🐗","Rustwood"],
+  ["Wisp","👻","Fallen Shrine"],
+  ["Bone Knight","💀","Black Keep"],
+  ["Ember Drake","🐉","Burning Ridge"],
+  ["Void Eye","👁️","The Deep"],
+];
+const BOSSES = [
+  ["Ash Warden","🗿"],["Mire Queen","🕷️"],["Grave Lord","🧟"],["The Furnace","🔥"]
+];
+
+const defaultState = {
+  level:1,xp:0,gold:0,kills:0,totalKills:0,highestLevel:1,
+  damageUp:0,speedUp:0,goldUp:0,bossUp:0,embers:0,ascensions:0,
+  enemyIndex:0,enemyHp:10,enemyMaxHp:10,auto:false,discovered:{}
+};
+let s = {...defaultState, ...(JSON.parse(localStorage.getItem("emberfall-save")||"{}"))};
+let autoTimer=null;
+
+const $=id=>document.getElementById(id);
+function xpNeed(){ return Math.floor(12*Math.pow(1.18,s.level-1)); }
+function baseDamage(){ return 2+s.damageUp+Math.floor((s.level-1)*0.55); }
+function damage(){ return Math.max(1, Math.floor(baseDamage()*(1+s.embers*0.05))); }
+function isBoss(){ return (s.kills+1)%10===0; }
+function enemyDef(){
+  if(isBoss()){
+    const b=BOSSES[Math.floor(s.kills/10)%BOSSES.length];
+    return {name:b[0],art:b[1],zone:"BOSS ENCOUNTER",boss:true};
+  }
+  const e=ENEMIES[s.enemyIndex%ENEMIES.length];
+  return {name:e[0],art:e[1],zone:e[2],boss:false};
+}
+function enemyMax(){
+  const scale = 9 + s.level*5 + Math.floor(s.kills*1.6);
+  return isBoss()? Math.floor(scale*3.2):scale;
+}
+function save(){ localStorage.setItem("emberfall-save",JSON.stringify(s)); }
+function spawn(){
+  s.enemyIndex=(s.enemyIndex+1)%ENEMIES.length;
+  s.enemyMaxHp=enemyMax(); s.enemyHp=s.enemyMaxHp;
+  const e=enemyDef(); s.discovered[e.name]=true;
+  save(); render();
+}
+function attack(){
+  const e=enemyDef();
+  let dmg=damage();
+  if(e.boss) dmg=Math.floor(dmg*(1+s.bossUp*0.10));
+  s.enemyHp-=dmg;
+  $("battleNotice").textContent=`-${dmg} HP`;
+  if(navigator.vibrate) navigator.vibrate(18);
+  if(s.enemyHp<=0) kill();
+  else {save();render();}
+}
+function kill(){
+  const e=enemyDef();
+  const goldGain=Math.max(1,Math.floor((4+s.level*2+(e.boss?10+s.level*2:0))*(1+s.goldUp*0.08)));
+  const xpGain=Math.floor(5+s.level*1.3+(e.boss?12:0));
+  s.gold+=goldGain; s.xp+=xpGain; s.kills++; s.totalKills++;
+  $("battleNotice").textContent=`Defeated! +${goldGain}g · +${xpGain} XP`;
+  while(s.xp>=xpNeed()){ s.xp-=xpNeed(); s.level++; s.highestLevel=Math.max(s.highestLevel,s.level); }
+  spawn();
+}
+function cost(type){
+  const n=s[type+"Up"];
+  const base={damage:10,speed:25,gold:30,boss:40}[type];
+  return Math.floor(base*Math.pow(1.65,n));
+}
+function buy(type){
+  const c=cost(type);
+  if(s.gold<c){$("battleNotice").textContent="Not enough gold.";return;}
+  s.gold-=c; s[type+"Up"]++; save(); render(); syncAuto();
+}
+function syncAuto(){
+  if(autoTimer) clearInterval(autoTimer);
+  if(s.auto){
+    const ms=Math.max(250,1100*(1-s.speedUp*0.1));
+    autoTimer=setInterval(attack,ms);
+  }
+}
+function ascend(){
+  if(s.level<20) return;
+  const earned=Math.max(1,Math.floor((s.level-15)/5));
+  const keep={embers:s.embers+earned,ascensions:s.ascensions+1,totalKills:s.totalKills,highestLevel:s.highestLevel,discovered:s.discovered};
+  s={...defaultState,...keep};
+  save(); render(); syncAuto();
+}
+function resetSave(){
+  if(confirm("Erase all Emberfall progress?")){
+    s={...defaultState}; save(); render(); syncAuto();
+  }
+}
+function render(){
+  const e=enemyDef();
+  $("zoneLabel").textContent=e.zone;
+  $("enemyName").textContent=e.name;
+  $("enemyLevel").textContent=e.boss?`Boss · Level ${s.level}`:`Level ${s.level}`;
+  $("enemyArt").textContent=e.art;
+  $("enemyTag").textContent=e.boss?"BOSS":"";
+  $("enemyTag").className=e.boss?"boss":"";
+  const pct=Math.max(0,100*s.enemyHp/s.enemyMaxHp);
+  $("enemyHpFill").style.width=pct+"%";
+  $("enemyHpText").textContent=`${Math.max(0,s.enemyHp)} / ${s.enemyMaxHp} HP`;
+  $("levelStat").textContent=s.level;
+  $("damageStat").textContent=damage();
+  $("goldStat").textContent=s.gold;
+  $("killsStat").textContent=s.kills;
+  $("xpFill").style.width=Math.min(100,100*s.xp/xpNeed())+"%";
+  $("xpText").textContent=`${s.xp} / ${xpNeed()} XP`;
+  $("embersTop").textContent=s.embers;
+  $("emberStat").textContent=s.embers;
+  $("emberBonus").textContent=`+${s.embers*5}%`;
+  $("highestLevel").textContent=s.highestLevel;
+  $("totalKills").textContent=s.totalKills;
+  $("ascensions").textContent=s.ascensions;
+  $("autoBtn").textContent=`Auto: ${s.auto?"ON":"OFF"}`;
+  $("damageCost").textContent=cost("damage");
+  $("speedCost").textContent=cost("speed");
+  $("goldCost").textContent=cost("gold");
+  $("bossCost").textContent=cost("boss");
+  $("ascendBtn").textContent=s.level>=20?`ASCEND FOR ${Math.max(1,Math.floor((s.level-15)/5))} EMBER(S)`:"ASCEND AT LEVEL 20";
+  $("ascendBtn").disabled=s.level<20;
+
+  const all=[...ENEMIES.map(e=>[e[0],e[1]]),...BOSSES];
+  $("bestiary").innerHTML=all.map(([n,a])=>`
+    <div class="lootitem"><b>${s.discovered[n]?a+" "+n:"❔ Unknown"}</b>
+    <span>${s.discovered[n]?"Discovered":"Keep fighting"}</span></div>`).join("");
+}
+
+document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+  $(btn.dataset.tab).classList.add("active");
+});
+$("attackBtn").onclick=attack;
+$("autoBtn").onclick=()=>{s.auto=!s.auto;save();render();syncAuto();}
+$("buyDamage").onclick=()=>buy("damage");
+$("buySpeed").onclick=()=>buy("speed");
+$("buyGold").onclick=()=>buy("gold");
+$("buyBoss").onclick=()=>buy("boss");
+$("ascendBtn").onclick=ascend;
+$("resetBtn").onclick=resetSave;
+
+if(!s.enemyMaxHp || s.enemyHp<=0){s.enemyMaxHp=enemyMax();s.enemyHp=s.enemyMaxHp;}
+render(); syncAuto();
+if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+</script>
+</body>
+</html>
