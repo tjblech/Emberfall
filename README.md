@@ -15,3 +15,10 @@ On Windows:
 The easiest way is to host this folder on any HTTPS static host (GitHub Pages, Netlify, Cloudflare Pages, etc.), open it in Safari on iPhone, then Share > Add to Home Screen.
 
 Progress is stored in localStorage on that iPhone/browser.
+
+
+## Save backups
+Open Records > Save Backup in the app:
+- Export Save downloads your progress as a JSON backup file.
+- Import Save restores a previously exported Emberfall save.
+- Importing replaces the current local save after confirmation.

@@ -156,6 +156,20 @@
       <div class="stat"><b id="highestLevel">1</b><span>Highest Level</span></div>
       <div class="stat" style="margin-top:8px"><b id="totalKills">0</b><span>Total Kills</span></div>
       <div class="stat" style="margin-top:8px"><b id="ascensions">0</b><span>Ascensions</span></div>
+
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #282830">
+        <div class="section-title" style="margin-bottom:6px">Save Backup</div>
+        <p class="muted" style="font-size:13px;margin:0 0 10px">
+          Export a backup file or restore one later. Importing replaces your current progress.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="mini" id="exportSaveBtn">Export Save</button>
+          <button class="mini" id="importSaveBtn">Import Save</button>
+        </div>
+        <input id="importSaveInput" type="file" accept=".json,application/json" style="display:none" />
+        <div class="notice" id="saveNotice"></div>
+      </div>
+
       <button class="mini danger" id="resetBtn" style="margin-top:12px;width:100%">Reset Save</button>
     </div>
   </section>
@@ -257,6 +271,70 @@ function ascend(){
   s={...defaultState,...keep};
   save(); render(); syncAuto();
 }
+function exportSave(){
+  try{
+    save();
+    const payload = {
+      game: "Emberfall",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      save: s
+    };
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `emberfall-save-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    $("saveNotice").textContent="Save exported.";
+  }catch(err){
+    $("saveNotice").textContent="Could not export save.";
+    console.error(err);
+  }
+}
+function importSaveFile(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const parsed = JSON.parse(reader.result);
+      const imported = parsed && parsed.save ? parsed.save : parsed;
+      if(!imported || typeof imported !== "object" || typeof imported.level !== "number"){
+        throw new Error("Invalid Emberfall save");
+      }
+      if(!confirm("Import this save and replace your current progress?")) return;
+
+      const clean = {...defaultState, ...imported};
+      clean.discovered = imported.discovered && typeof imported.discovered === "object" ? imported.discovered : {};
+      clean.auto = false; // safer after importing
+      s = clean;
+
+      if(!s.enemyMaxHp || s.enemyHp <= 0){
+        s.enemyMaxHp = enemyMax();
+        s.enemyHp = s.enemyMaxHp;
+      }
+      save();
+      render();
+      syncAuto();
+      $("saveNotice").textContent="Save imported successfully.";
+    }catch(err){
+      $("saveNotice").textContent="That file is not a valid Emberfall save.";
+      console.error(err);
+    }finally{
+      $("importSaveInput").value="";
+    }
+  };
+  reader.onerror = ()=>{
+    $("saveNotice").textContent="Could not read that save file.";
+    $("importSaveInput").value="";
+  };
+  reader.readAsText(file);
+}
+
 function resetSave(){
   if(confirm("Erase all Emberfall progress?")){
     s={...defaultState}; save(); render(); syncAuto();
@@ -312,6 +390,9 @@ $("buySpeed").onclick=()=>buy("speed");
 $("buyGold").onclick=()=>buy("gold");
 $("buyBoss").onclick=()=>buy("boss");
 $("ascendBtn").onclick=ascend;
+$("exportSaveBtn").onclick=exportSave;
+$("importSaveBtn").onclick=()=>$("importSaveInput").click();
+$("importSaveInput").onchange=e=>importSaveFile(e.target.files[0]);
 $("resetBtn").onclick=resetSave;
 
 if(!s.enemyMaxHp || s.enemyHp<=0){s.enemyMaxHp=enemyMax();s.enemyHp=s.enemyMaxHp;}
