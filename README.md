@@ -1,24 +1,30 @@
-# Emberfall PWA
+# Emberfall — Tactical Backpack PWA
 
-A tiny offline progression RPG.
+A fully local/offline backpack-building roguelite built as a PWA.
+
+## Main systems
+- 5x5 starting bag with shaped gear and rotation.
+- Tap an item, then tap an empty bag cell to reposition it.
+- Adjacency, empty space, bag-edge placement, rows, and loose-gear state can change item effects.
+- Automatic combat driven by the weapons currently fitted in the bag.
+- Focus is a manual combat ability with a cooldown.
+- Loot choices after key fights, Elite hunts, route events, traders, shrines, and an unlockable blacksmith.
+- Bosses modify the bag itself (row, column, pouch capacity, or harness toughness).
+- Essence meta-progression unlocks new item pools, mechanics, routes, relics, and starting styles rather than flat prestige damage.
+- Local save plus Export Save / Import Save backup support.
 
 ## Run locally
-Because service workers require HTTP(S), don't open index.html directly for the installable/offline behavior.
+Service workers need HTTP(S), so do not open `index.html` directly if you want full PWA/offline behavior.
 
-On Windows:
-1. Install Python if needed.
-2. Open a terminal in this folder.
-3. Run: `python -m http.server 8000`
-4. Visit `http://localhost:8000` on your computer.
+From this folder:
 
-## Put it on iPhone
-The easiest way is to host this folder on any HTTPS static host (GitHub Pages, Netlify, Cloudflare Pages, etc.), open it in Safari on iPhone, then Share > Add to Home Screen.
+```bash
+python -m http.server 8000
+```
 
-Progress is stored in localStorage on that iPhone/browser.
+Then open `http://localhost:8000`.
 
+## Install on iPhone
+Host this folder on an HTTPS static host (GitHub Pages, Cloudflare Pages, Netlify, etc.), open the site in Safari, then use **Share → Add to Home Screen**.
 
-## Save backups
-Open Records > Save Backup in the app:
-- Export Save downloads your progress as a JSON backup file.
-- Import Save restores a previously exported Emberfall save.
-- Importing replaces the current local save after confirmation.
+Progress is saved locally on that device. Use **System → Export Save** before deleting the PWA, clearing Safari website data, changing domains, or moving phones.
